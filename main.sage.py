@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from matrix_gps_local import finitely_generated as fin_gen
 
-D4 = DihedralGroup(4)
 
 '''
 Inputs:
@@ -154,8 +153,9 @@ def run_example(MG):
     '''
 
 #############################################################################
-## Examples
+# Examples
 #############################################################################
+D4 = DihedralGroup(4)
 
 
 '''
@@ -197,7 +197,7 @@ MG = fin_gen.MatrixGroup(L)
 print("---------------------------------")
 print("ReflectionGroup((4,4,2)) = D_4:")
 print("---------------------------------")
-run_example(MG)
+#run_example(MG)
 
 
 # Example: D_4 as a complex reflection group using a nice basis
@@ -230,13 +230,23 @@ print("C_4 (Stanley example 2.3):")
 print("---------------------------------")
 #run_example(MG)
 
-# The output of invariant_generators is an h.s.o.p.
-G = MG.invariant_generators()
-I = ideal(G).groebner_basis()
-I = Ideal(I)
+# Example: A larger real reflection group
+W = ReflectionGroup((2,1,3))
+m = W[0].to_matrix()
+R = QQ
+MS = MatrixSpace(R, *m.dimensions())
+L = [MS(x.to_matrix()) for x in W]
+MG = fin_gen.MatrixGroup(L)
+print("---------------------------------")
+print("ReflectionGroup((2,1,3)):")
+print("---------------------------------")
+run_example(MG)
+print(W.character_table())
 
-gndR = G[0].parent()
-quot = gndR.quotient(I)
+
+
+
+
 
 '''
 The matrix group MG has two methods for computing the generators of the 
