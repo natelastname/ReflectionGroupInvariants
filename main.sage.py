@@ -243,11 +243,6 @@ print("---------------------------------")
 run_example(MG)
 print(W.character_table())
 
-
-
-
-
-
 '''
 The matrix group MG has two methods for computing the generators of the 
 invariant ring: "invariants_of_degree" and "invariant_generators". you'll
