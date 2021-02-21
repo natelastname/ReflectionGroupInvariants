@@ -42,28 +42,23 @@ def run_example(MG):
         CF = ClassFunction(MG, char)
         for comp in CF.decompose():
             print("%s*%s"%(comp[0],comp[1].values()))
-
-    '''
-    # By Proposition 4.9 in Stanley's paper, the resulting rep. is the regular rep.
-    print("Action of MG on the full K-basis for quot:")
-    i = 0
-    for g in MG:
-        i = i + 1
-        mat = matrix_wrt_standard_monos(B, quot, g)
-        print(str(i)+":")
-        print(mat)
-    '''
-
+    
+    
+def test():
+    return (1, 2, 3, 4)
+            
 print("---------------------------------")
 print("ReflectionGroup((1,1,4)):")
 print("---------------------------------")
-W = ReflectionGroup((1,1,4))
-MG = refl.to_matrix_gp(W)
+W = ReflectionGroup((4,4,2))
+(MG, MS) = refl.to_matrix_gp(W)
 run_example(MG)
+I = refl.orlik_artin_ideal(W, MS)
 
 print("---------------------------------")
 print("ReflectionGroup(4):")
 print("---------------------------------")
 #W = ReflectionGroup(4)
-#MG = refl.to_matrix_gp(W)
+#(MG, MS) = refl.to_matrix_gp(W)
 #run_example(MG)
+#I = refl.orlik_artin_ideal(W, MS)

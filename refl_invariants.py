@@ -136,4 +136,89 @@ def to_matrix_gp(W):
     L = [MS(x.to_matrix()) for x in W]
     MG = fin_gen.MatrixGroup(L)
 
-    return MG
+    return (MG, MS)
+
+'''
+Inputs: 
+       - hyps, a list of hyperplanes possibly containing hyperplanes h and -h.
+Output:
+       - The list hyps with one element of each negated pair removed.
+Note: This function is specifically because the hyperplane constructor throws an
+error when given a set of hyperplanes containing a pair (h, -h).
+'''
+def remove_negated_pairs(hyps):
+    hyps = set(hyps)
+    hyps2 = set()
+    for h in hyps:
+        if (h not in hyps2) and (-h not in hyps2):
+            hyps2 = hyps2.union(set([h]))
+    return list(hyps2)
+
+
+def orlik_artin_ideal(W, MS):
+    gndR = MS.base_ring()
+    rts = W.roots()
+    #rts = W.positive_roots()
+    varNames = []
+    dim = MS.dims()[0]
+    for i in range(0, dim):
+        varNames.append("x"+str(i+1))
+        
+    hyp = HyperplaneArrangements(gndR, tuple(varNames))        
+    G = hyp.gens()
+    A = []
+    for i in range(0,len(rts)):
+        coords = tuple([gndR(x) for x in rts[i]])
+        assert(len(coords) == len(G))
+        p = 0
+        for ind in range(0,len(G)):
+            p += (gndR(coords[ind]))*G[ind]
+        A.append(p)
+        
+    A = hyp(remove_negated_pairs(A))
+    M = A.matroid()
+    
+    if len(M.groundset()) == A.rank():
+        # there are no circuits.
+        pass
+    
+    circuits = [list(x) for x in M.circuits()]
+
+
+    varNamesOA = []
+    for i in range(0,len(A)):
+        varNamesOA.append("u"+str(i+1))
+
+    OARing = PolynomialRing(gndR, varNamesOA)
+    G = OARing.gens()
+    I = []
+    
+    for C in circuits:
+        elts = map(lambda index: A[index], C)
+        L = []
+        for h in elts:
+            coefs = h.coefficients()
+            assert(coefs[0] == 0)
+            L.append(coefs[1:])
+        
+        K = matrix(L).kernel().basis_matrix()
+        p = 0
+        gen = 0
+        for i in range(0,len(K[0])):
+            coef = K[0][i]
+            term = OARing(coef)
+            for j in range(0, len(C)):
+                if j != i:
+                    term = term*G[C[j]]
+            gen = gen + term
+            p = p + A[C[i]]*coef
+            
+        I.append(gen)
+        assert(p == 0)
+        assert(K.dimensions()[0] == 1)    
+    
+    for u in G:
+        I.append(u*u)
+        
+    
+    return I
