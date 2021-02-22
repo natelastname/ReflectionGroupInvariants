@@ -44,7 +44,6 @@ def get_index(B, quot, mono):
             pass
     raise RuntimeError("Could not determine the index of %s in the list: \n%s"%(mono, B))    
 
-
 '''
 Inputs: 
        - f, an element ofa quotient ring
@@ -59,7 +58,6 @@ def get_terms(f):
         L.append(f.lt())
         f = f - f.lt()
     return L
-
 
 '''
 Inputs: 
@@ -143,8 +141,8 @@ Inputs:
        - hyps, a list of hyperplanes possibly containing hyperplanes h and -h.
 Output:
        - The list hyps with one element of each negated pair removed.
-Note: This function is specifically because the hyperplane constructor throws an
-error when given a set of hyperplanes containing a pair (h, -h).
+Note: This function is specifically because the hyperplane constructor throws 
+an error when given a set of hyperplanes containing a pair (h, -h).
 '''
 def remove_negated_pairs(hyps):
     hyps = set(hyps)
@@ -154,8 +152,18 @@ def remove_negated_pairs(hyps):
             hyps2 = hyps2.union(set([h]))
     return list(hyps2)
 
-
-def orlik_artin_ideal(W, MS):
+'''
+Inputs: 
+       - W, a reflection group.
+Output:
+       - I, The Orlik-Artin ideal of the hyperplane arrangement defined by W.
+       - HT, A hash table mapping vars of the ring I.parent() to their corresponding hyperplanes.
+Note: This function is specifically because the hyperplane constructor throws an
+error when given a set of hyperplanes containing a pair (h, -h).
+'''
+def orlik_artin_ideal(W):
+    (MG, MS) = to_matrix_gp(W)
+    
     gndR = MS.base_ring()
     rts = W.roots()
     #rts = W.positive_roots()
@@ -183,16 +191,19 @@ def orlik_artin_ideal(W, MS):
         pass
     
     circuits = [list(x) for x in M.circuits()]
-
-
+    
     varNamesOA = []
     for i in range(0,len(A)):
         varNamesOA.append("u"+str(i+1))
 
     OARing = PolynomialRing(gndR, varNamesOA)
     G = OARing.gens()
-    I = []
-    
+
+    rootVarsHT = {}
+    for i in range(0, len(G)):
+        rootVarsHT[G[i]] = A[i]
+        
+    I = []    
     for C in circuits:
         elts = map(lambda index: A[index], C)
         L = []
@@ -202,7 +213,6 @@ def orlik_artin_ideal(W, MS):
             L.append(coefs[1:])
         
         K = matrix(L).kernel().basis_matrix()
-        p = 0
         gen = 0
         for i in range(0,len(K[0])):
             coef = K[0][i]
@@ -211,14 +221,10 @@ def orlik_artin_ideal(W, MS):
                 if j != i:
                     term = term*G[C[j]]
             gen = gen + term
-            p = p + A[C[i]]*coef
-            
         I.append(gen)
-        assert(p == 0)
         assert(K.dimensions()[0] == 1)    
     
     for u in G:
         I.append(u*u)
-        
     
-    return I
+    return (ideal(I), rootVarsHT)

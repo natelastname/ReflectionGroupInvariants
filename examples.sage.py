@@ -1,7 +1,9 @@
 import refl_invariants as refl
+import tests_refl
 from matrix_gps_local import finitely_generated as fin_gen
 
 reload(refl)
+reload(tests_refl)
 reload(fin_gen)
 
 def run_example(MG):
@@ -43,9 +45,8 @@ def run_example(MG):
         for comp in CF.decompose():
             print("%s*%s"%(comp[0],comp[1].values()))
     
+
     
-def test():
-    return (1, 2, 3, 4)
             
 print("---------------------------------")
 print("ReflectionGroup((1,1,4)):")
@@ -53,12 +54,14 @@ print("---------------------------------")
 W = ReflectionGroup((4,4,2))
 (MG, MS) = refl.to_matrix_gp(W)
 run_example(MG)
-I = refl.orlik_artin_ideal(W, MS)
+(I, HT) = refl.orlik_artin_ideal(W)
+tests_refl.test_gens_OA(I, HT)
 
 print("---------------------------------")
 print("ReflectionGroup(4):")
 print("---------------------------------")
-#W = ReflectionGroup(4)
-#(MG, MS) = refl.to_matrix_gp(W)
-#run_example(MG)
-#I = refl.orlik_artin_ideal(W, MS)
+W = ReflectionGroup(4)
+(MG, MS) = refl.to_matrix_gp(W)
+run_example(MG)
+(I, HT) = refl.orlik_artin_ideal(W)
+tests_refl.test_gens_OA(I, HT)
