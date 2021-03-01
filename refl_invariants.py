@@ -42,7 +42,7 @@ def get_index(B, quot, mono):
         else:
             #print(str(LHS)+" = "+str(RHS)+"? No")
             pass
-    raise RuntimeError("Could not determine the index of %s in the list: \n%s"%(mono, B))    
+    raise RuntimeError("Could not find %s in the list: \n%s"%(mono, B))    
 
 '''
 Inputs: 
@@ -50,7 +50,8 @@ Inputs:
 Outputs: 
        - A list of the terms of f.
 
-This is the same thing as f.monomials() except the coefficients are not discarded.
+This is the same thing as f.monomials() except the coefficients are not 
+discarded.
 '''
 def get_terms(f):
     L = []
@@ -61,25 +62,26 @@ def get_terms(f):
 
 '''
 Inputs: 
-       - B is a list of distinct monomials in a polynomial ring R which represents a basis.
+       - B is a list of distinct monomials in a polynomial ring R which
+         represents a basis.
        - quot is a quotient ring of R.
        - g is a matrix that acts on the variables of R.
 Output:
        - A matrix for the action induced by g on the basis B. 
 
-Note: For each b\in B, quot(g.act_on_polynomial(b)) must only consist of monomials in the K-span of B
-where K = g.base_ring().
+Note: For each b\in B, quot(g.act_on_polynomial(b)) must only consist of 
+monomials in the K-span of B (where K = g.base_ring().)
 '''
 def matrix_wrt_standard_monos(B, quot, g):
     gndR = g.base_ring()
-    g = g.matrix()
+    #g = g.matrix()
     cols = []
-    for b in B:
+    for monoB in B:
         col = [0 for foo in B]
-        gg = quot(g.act_on_polynomial(b))
+        gg = quot(g.act_on_polynomial(monoB))
         for mono in get_terms(gg):
-            # It must work in the quotient ring so that the monomials of gg are canonically identified
-            # with elements of a C-basis for quot.
+            # It must work in the quotient ring so that the monomials of gg are
+            # canonically identified with elements of a C-basis for quot.
             assert(mono.lc() != 0)
             assert(len(mono.monomials()) == 1)
             coef = 0
@@ -102,7 +104,7 @@ def matrix_wrt_standard_monos(B, quot, g):
 
 '''
 Inputs: 
-       - A reflection group returned by Chevie. (e.g., "ReflectionGroup((1,1,4))")
+       - A refl. group returned by Chevie. (e.g., "ReflectionGroup((1,1,4))")
 Output:
        - A matrix group for which the method .invariant_generators() is defined
 '''
@@ -157,9 +159,8 @@ Inputs:
        - W, a reflection group.
 Output:
        - I, The Orlik-Artin ideal of the hyperplane arrangement defined by W.
-       - HT, A hash table mapping vars of the ring I.parent() to their corresponding hyperplanes.
-Note: This function is specifically because the hyperplane constructor throws an
-error when given a set of hyperplanes containing a pair (h, -h).
+       - HT, A hash table mapping vars of the ring I.parent() to their
+         corresponding hyperplanes.
 '''
 def orlik_artin_ideal(W):
     (MG, MS) = to_matrix_gp(W)
@@ -189,22 +190,31 @@ def orlik_artin_ideal(W):
     if len(M.groundset()) == A.rank():
         # there are no circuits.
         pass
-    
-    circuits = [list(x) for x in M.circuits()]
+
+    circuits = M.circuits()
+    print("num. circuits:"+str(len(circuits)))
+    circuits = [list(x) for x in circuits]
     
     varNamesOA = []
     for i in range(0,len(A)):
         varNamesOA.append("u"+str(i+1))
-
+    
     OARing = PolynomialRing(gndR, varNamesOA)
     G = OARing.gens()
-
+    
     rootVarsHT = {}
     for i in range(0, len(G)):
         rootVarsHT[G[i]] = A[i]
         
-    I = []    
+    I = []
+
+    n = 0
     for C in circuits:
+        if n % 250 == 0:
+            pass
+            #print("%s/%s"%(n,len(circuits)))
+        n = n + 1
+        
         elts = map(lambda index: A[index], C)
         L = []
         for h in elts:
@@ -217,12 +227,14 @@ def orlik_artin_ideal(W):
         for i in range(0,len(K[0])):
             coef = K[0][i]
             term = OARing(coef)
+            #term = OARing(coef/(sqrt(norm(coef))))
+
             for j in range(0, len(C)):
                 if j != i:
                     term = term*G[C[j]]
             gen = gen + term
         I.append(gen)
-        assert(K.dimensions()[0] == 1)    
+        assert(K.dimensions()[0] == 1)
     
     for u in G:
         I.append(u*u)

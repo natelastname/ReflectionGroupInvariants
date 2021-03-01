@@ -28,7 +28,7 @@ def test_gen_OA(gen, HT):
         p = p + ((HT[var])*gen.monomial_coefficient(mono))
 
     assert(p == 0)
-    print(str(gen)+" -> pass")
+    #print(str(gen)+" -> pass")
 
 # Test the result of orlik_artin_ideal.
 def test_gens_OA(I, HT):
@@ -36,6 +36,7 @@ def test_gens_OA(I, HT):
     for gen in I.gens():
         if len(gen.monomials()) == 1:
             # It's one of the generators of the form u_i^2.
+            #print(str(gen)+" -> pass")
             pass
         else:
             test_gen_OA(gen, HT)
