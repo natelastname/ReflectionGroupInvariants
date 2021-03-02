@@ -154,6 +154,10 @@ def remove_negated_pairs(hyps):
             hyps2 = hyps2.union(set([h]))
     return list(hyps2)
 
+def hyperplanes_to_linear_polys(A, gndR):
+    pass
+
+
 '''
 Inputs: 
        - W, a reflection group.
@@ -167,7 +171,6 @@ def orlik_artin_ideal(W):
     
     gndR = MS.base_ring()
     rts = W.roots()
-    #rts = W.positive_roots()
     varNames = []
     dim = MS.dims()[0]
     for i in range(0, dim):
@@ -187,12 +190,7 @@ def orlik_artin_ideal(W):
     A = hyp(remove_negated_pairs(A))
     M = A.matroid()
     
-    if len(M.groundset()) == A.rank():
-        # there are no circuits.
-        pass
-
     circuits = M.circuits()
-    print("num. circuits:"+str(len(circuits)))
     circuits = [list(x) for x in circuits]
     
     varNamesOA = []
@@ -207,34 +205,31 @@ def orlik_artin_ideal(W):
         rootVarsHT[G[i]] = A[i]
         
     I = []
-
-    n = 0
     for C in circuits:
-        if n % 250 == 0:
-            pass
-            #print("%s/%s"%(n,len(circuits)))
-        n = n + 1
-        
+        # convert the indices of A.matroid() to hyperplanes
         elts = map(lambda index: A[index], C)
+        
+        # get the coef. vector and remove the constant term (which should be 0)
         L = []
         for h in elts:
             coefs = h.coefficients()
             assert(coefs[0] == 0)
             L.append(coefs[1:])
-        
+
+        # compute the coefficients of the linear relation
         K = matrix(L).kernel().basis_matrix()
+
+        # Compute the generator corresponding to this circuit
         gen = 0
         for i in range(0,len(K[0])):
             coef = K[0][i]
             term = OARing(coef)
             #term = OARing(coef/(sqrt(norm(coef))))
-
             for j in range(0, len(C)):
                 if j != i:
                     term = term*G[C[j]]
             gen = gen + term
         I.append(gen)
-        assert(K.dimensions()[0] == 1)
     
     for u in G:
         I.append(u*u)

@@ -18,10 +18,7 @@ def convert_hyp(gndRJ, hyp):
     
     return HT
 
-def normalize_lc(poly):
-
-    return poly/(poly.lc())
-    
+def normalize_lc(poly): 
     coef = poly.lc().conjugate() * poly.lc()
     coef = sqrt(coef)
     poly_norm = poly/coef
@@ -30,15 +27,20 @@ def normalize_lc(poly):
     assert( norm(poly_norm.lc()) ==1)
     return poly_norm
 
-
-def get_action(g, HT2, HT3, hyp_vars):
+'''
+Inputs: 
+       - g, a matrix that acts on the variables of the hyperplanes in HT
+       - HT, a hashtable that maps the variables u_i in hyp_vars to hyperplanes
+       - 
+'''
+def get_action(g, HT2, HT3, hyp_vars):    
     rep = g.representative().matrix()
     mat = []
     for i in range(0,len(hyp_vars)):
         poly = hyp_vars[i].substitute(HT2)
         g0 = rep.act_on_polynomial(poly)
         #gg = normalize_lc(g0)
-        assert(g0 in HT3)
+        gg = g0
         # The sign might be wrong
         if -gg in HT3:
             gg = -gg
@@ -62,12 +64,6 @@ def run_example(MG):
     gndRJ= J[0].parent()
     print("computing Orlik-Artin ideal:")
     (I, HT) = refl.orlik_artin_ideal(W)
-    for key in HT.keys():
-        coefs = HT[key].coefficients()
-        terms = []
-        for i in range(1, len(gndRJ.gens())+1):
-            terms.append(gndRJ.gens()[i-1]*coefs[i])
-        print("%s -> %s"%(key, sum(terms)))
         
     print("computing GB of Orlik-Artin ideal...")
     I = I.groebner_basis()
@@ -95,22 +91,22 @@ def run_example(MG):
         terms = []
         for i in range(1, len(gndRJ.gens())+1):
             terms.append(gndRJ.gens()[i-1]*coefs[i])
+        
+        #poly = normalize_lc(sum(terms))
+        poly = sum(terms)
 
-        poly = normalize_lc(sum(terms))
-
+        print("------------------------")
+        print(key)
+        print(poly)
+        
         HT2[key] = poly
         HT3[poly] = key
-    
+        
     print("----------- Action of MG on the graded components of quot: -----------")
     for deg in Bdeg:
         rep = []
         for g in MG_rep:
-            #res = refl.matrix_wrt_standard_monos(deg, quot, g.representative().matrix())        
             act = get_action(g, HT2, HT3, gndR.gens())
-            #print("---------------------------------------------------------------")
-            #print(g.representative().matrix())
-            #print("---------------------")
-            #print(act)
             res = refl.matrix_wrt_standard_monos(deg, quot, act)        
             rep.append(res)
 
@@ -147,5 +143,6 @@ print("---------------------------------")
 W = ReflectionGroup(4)
 (MG, MS) = refl.to_matrix_gp(W)
 run_example(MG)
+
 #(I, HT) = refl.orlik_artin_ideal(W)
 #tests_refl.test_gens_OA(I, HT)
