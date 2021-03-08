@@ -118,7 +118,7 @@ def to_matrix_gp(W):
     contains all entries of the matrices in our representation.
     '''
     gp_lcm = 1
-    for m in W:
+    for m in W.conjugacy_classes_representatives():
         M = m.to_matrix()
         MS = M.matrix_space()
         order = 1
@@ -154,10 +154,22 @@ def remove_negated_pairs(hyps):
             hyps2 = hyps2.union(set([h]))
     return list(hyps2)
 
-def hyperplanes_to_linear_polys(A, gndR):
-    pass
-
-
+# Compute the generator corresponding to this circuit term-by-term
+def create_gen(OARing, K, C):
+        G = OARing.gens()
+        gen = 0
+        gens_list = []
+        for i in range(0,len(K[0])):
+            coef = K[0][i]
+            term = OARing(coef)
+            #term = OARing(coef/(sqrt(norm(coef))))
+            for j in range(0, len(C)):
+                if j != i:
+                    term = term*G[C[j]]
+            
+            gen = gen + term
+        return gen
+    
 '''
 Inputs: 
        - W, a reflection group.
@@ -171,6 +183,7 @@ def orlik_artin_ideal(W):
     
     gndR = MS.base_ring()
     rts = W.roots()
+    
     varNames = []
     dim = MS.dims()[0]
     for i in range(0, dim):
@@ -205,33 +218,30 @@ def orlik_artin_ideal(W):
         rootVarsHT[G[i]] = A[i]
         
     I = []
+    n = 0
     for C in circuits:
-        # convert the indices of A.matroid() to hyperplanes
-        elts = map(lambda index: A[index], C)
+        if n % 100 == 0:
+            print("%s/%s"%(n,len(circuits)))
+        n = n + 1
         
+        # convert the indices of A.matroid() to hyperplanes
+        elts = map(lambda index: A[index], C)        
         # get the coef. vector and remove the constant term (which should be 0)
         L = []
         for h in elts:
             coefs = h.coefficients()
             assert(coefs[0] == 0)
             L.append(coefs[1:])
-
-        # compute the coefficients of the linear relation
-        K = matrix(L).kernel().basis_matrix()
-
-        # Compute the generator corresponding to this circuit
-        gen = 0
-        for i in range(0,len(K[0])):
-            coef = K[0][i]
-            term = OARing(coef)
-            #term = OARing(coef/(sqrt(norm(coef))))
-            for j in range(0, len(C)):
-                if j != i:
-                    term = term*G[C[j]]
-            gen = gen + term
+            
+        # compute the coefficients of the linear relation. This appears to be a
+        # performance bottleneck. This is probably because number field arithmetic
+        # is slow rather than the linear algebra implementation. 
+        K = matrix(OARing.base_ring(), L).kernel().basis_matrix()
+        gen = create_gen(OARing, K, C)
         I.append(gen)
     
     for u in G:
         I.append(u*u)
-    
+
     return (ideal(I), rootVarsHT)
+
