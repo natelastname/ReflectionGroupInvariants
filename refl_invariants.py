@@ -199,7 +199,7 @@ def orlik_artin_ideal(W):
         for ind in range(0,len(G)):
             p += (gndR(coords[ind]))*G[ind]
         A.append(p)
-        
+
     A = hyp(remove_negated_pairs(A))
     M = A.matroid()
     

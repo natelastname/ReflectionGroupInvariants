@@ -12,7 +12,6 @@ reload(fin_gen)
 Inputs: 
        - g, a matrix that acts on the variables of the hyperplanes in HT.
        - HT, a hashtable that maps the variables u_i in hyp_vars to linear polys.
-       - HT_inv, maps the values of HT to their keys.
        - hyp_vars, a list of variables u_i corresponding to hyperplanes.
 Outputs:
        - A matrix (the action of g on the u_i induced by the action of g on x_i)
@@ -23,7 +22,9 @@ def get_action(g, HT, hyp_vars):
     mat = []
 
     hyp_roots = [var.substitute(HT) for var in hyp_vars]
-    
+
+    # g is a conjugacy class representative
+    # we have to compute the action of g on the hyperplanes "hyp"
     for i in range(0,len(hyp_vars)):
         hyp = hyp_vars[i].substitute(HT)
         act = rep.act_on_polynomial(hyp)
@@ -105,9 +106,9 @@ print("---------------------------------")
 print("ReflectionGroup(4):")
 print("---------------------------------")
 W = ReflectionGroup(4)
-                
-assert(W.cardinality() == len(W.roots()))
+reflections = W._gap_group.reflections
+distinguished_reflns = gap3("Reflections(%s);"%W_gap)
+W_gap = gap3(W._gap_group)
 (MG, MS) = refl.to_matrix_gp(W)
 run_example(W,MG)
-
 
