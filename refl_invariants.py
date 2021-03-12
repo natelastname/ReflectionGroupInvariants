@@ -149,9 +149,12 @@ an error when given a set of hyperplanes containing a pair (h, -h).
 def remove_negated_pairs(hyps):
     hyps = set(hyps)
     hyps2 = set()
-    for h in hyps:
-        if (h not in hyps2) and (-h not in hyps2):
-            hyps2 = hyps2.union(set([h]))
+    for hyper in hyps:
+        hyper_lc = hyper.to_symmetric_space().lc()
+        hyper = hyper/hyper_lc
+        if (hyper not in hyps2) and (-hyper not in hyps2):
+            hyps2 = hyps2.union(set([hyper]))
+            
     return list(hyps2)
 
 # Compute the generator corresponding to this circuit term-by-term
