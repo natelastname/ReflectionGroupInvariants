@@ -2,9 +2,9 @@ import refl_invariants as refl
 import tests_refl
 from matrix_gps_local import finitely_generated as fin_gen
 
-reload(refl)
-reload(tests_refl)
-reload(fin_gen)
+#reload(refl)
+#reload(tests_refl)
+#reload(fin_gen)
 
 def hyperplanes_to_linear_polys(HT):
     # HT maps the variables u_i to hyperplanes
@@ -90,7 +90,7 @@ def total_character(MG, gndR, quot, Bdeg, HT):
     rep = []
     print("----- computing action... -----")
     for i in range(0,len(MG_rep)):
-        print("Computing conjugacy class %i/%i..."%(i+1,len(MG_rep)-1))
+        #print("Computing conjugacy class %i/%i..."%(i+1,len(MG_rep)-1))
         g = MG_rep[i]
         act = get_action(g, HT, gndR.gens())
         res = refl.matrix_wrt_standard_monos(B, quot, act)
@@ -108,18 +108,15 @@ def total_character(MG, gndR, quot, Bdeg, HT):
         index = char_table.index(vals)
         if mult > vals[0]:
             subrep_of_regular_rep = False
-        print("#%s, dimension:%s, multiplicity:%s"%(index, vals[0], mult))
-
-    print("----- Action is a subrepresentation of the regular representation:")
-    print(subrep_of_regular_rep)
-        
+        print("#%s, dimension:%s, multiplicity:%s"%(index, vals[0], mult))        
     
 def run_example(W,MG):
     print("----- computing Orlik-Artin ideal: -----")
     (I, HT) = refl.orlik_artin_ideal(W)
     #tests_refl.test_gens_OA(I, HT)
     print("----- variables of Orlik-Artin algebra: -----")
-    varsI = HT.keys()
+    varsI = list(HT)
+    #varsI = HT.keys()
     varsI.sort()
     for i in range(0, len(varsI)):
         A = varsI[i]
@@ -164,8 +161,7 @@ for comp in res:
     print(comp)
 assert(False)
 '''
-
-i=24
+i=7
 print("---------------------------------")
 print("ReflectionGroup("+str(i)+"):")
 print("---------------------------------")

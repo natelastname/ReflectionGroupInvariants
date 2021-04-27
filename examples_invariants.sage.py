@@ -1,9 +1,9 @@
 import refl_invariants as refl
 from matrix_gps_local import finitely_generated as fin_gen
 
-reload(refl)
-reload(tests_refl)
-reload(fin_gen)
+#reload(refl)
+#reload(tests_refl)
+#reload(fin_gen)
 
 def run_example(MG):
     print("Computing invariants...")
@@ -33,10 +33,10 @@ def run_example(MG):
     # Is this guarenteed to be in the same order as the character table?
     MG_rep = MG.conjugacy_classes()
 
-    print("Action of MG on the graded components of quot:")
+    print("Action of G on the graded components of quot:")
     for b in Bdeg:
         rep = [refl.matrix_wrt_standard_monos(b, quot, g.representative().matrix()) for g in MG_rep]
-        print("--------- action of MG on "+str(b)+":")
+        print("--------- action of G on "+str(b)+":")
         char = []
         for mat in rep:
             char.append(mat.trace())
